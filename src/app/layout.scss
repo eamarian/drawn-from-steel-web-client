@@ -1,0 +1,12 @@
+body {
+  margin: 0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+
+  main {
+    flex-grow: 1;
+    padding: 40px;
+  }
+}
