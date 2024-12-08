@@ -28,7 +28,9 @@ export default function Footer() {
         <Typography>DRAW STEEL © 2024 MCDM Productions, LLC</Typography>
       </span>
       <span className="main-footer-section">
-        <Typography>Designed by Evan Marian</Typography>
+        <Typography>
+          Designed by Kevin Osborne. Built by Evan Marian.
+        </Typography>
       </span>
     </footer>
   );

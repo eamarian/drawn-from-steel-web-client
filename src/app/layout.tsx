@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getServerSession } from "next-auth";
 
 import "./layout.scss";
 
@@ -27,17 +28,19 @@ export const metadata: Metadata = {
   description: "A hero builder for the Draw Steel TTRPG",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const session = await getServerSession();
+  console.log(`User: ${session?.user}`);
   return (
     <html lang="en">
       <body className={roboto.variable}>
         <AppRouterCacheProvider>
           <ThemeProvider theme={theme}>
-            <Navbar />
+            <Navbar session={session} />
             <main>{children}</main>
             <Footer />
           </ThemeProvider>
