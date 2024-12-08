@@ -2,9 +2,6 @@ import { Grid2 as Grid } from "@mui/material";
 import MenuCard from "./components/menu-card/menu-card";
 
 export default function HomePage() {
-  console.log(`Client ID: ${process.env.AUTH_GOOGLE_ID!}`);
-  console.log(`Client Secret: ${process.env.AUTH_GOOGLE_SECRET!}`);
-
   return (
     <Grid
       container
