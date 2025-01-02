@@ -1,9 +1,10 @@
-import NextAuth, { AuthOptions } from "next-auth";
+import NextAuth, { AuthOptions, getServerSession } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
+import CustomerAdapter from "./adapter";
 
-const NextAuthOptions: AuthOptions = {
+export const NextAuthOptions: AuthOptions = {
   session: {
-    strategy: "jwt",
+    strategy: "database",
   },
   providers: [
     GoogleProvider({
@@ -11,6 +12,16 @@ const NextAuthOptions: AuthOptions = {
       clientSecret: process.env.AUTH_GOOGLE_SECRET!,
     }),
   ],
+  adapter: CustomerAdapter(),
+  callbacks: {
+    session: async ({ session, user }) => {
+      session.user.id = user.id;
+      return session;
+    },
+  },
 };
 
 export const handler = NextAuth(NextAuthOptions);
+export const getNextServerSession = () => {
+  return getServerSession(NextAuthOptions);
+};

@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { getServerSession } from "next-auth";
 
 import "./layout.scss";
 
@@ -33,14 +32,12 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const session = await getServerSession();
-  console.log(`User: ${session?.user}`);
   return (
     <html lang="en">
       <body className={roboto.variable}>
         <AppRouterCacheProvider>
           <ThemeProvider theme={theme}>
-            <Navbar session={session} />
+            <Navbar />
             <main>{children}</main>
             <Footer />
           </ThemeProvider>

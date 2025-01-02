@@ -2,15 +2,12 @@
 
 import { useState, MouseEvent, MouseEventHandler } from "react";
 import { useRouter } from "next/navigation";
-import { Session } from "next-auth";
+import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { Button, IconButton, Avatar, Menu, MenuItem } from "@mui/material";
 
-interface AccountProps {
-  session: Session | null;
-}
-
-export default function Account(props: AccountProps) {
+export default function Account() {
+  const { data: session } = useSession();
   const router = useRouter();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
@@ -28,14 +25,17 @@ export default function Account(props: AccountProps) {
   const handleClose = () => {
     setAnchorEl(null);
   };
-
-  return props.session?.user ? (
+  console.log(session);
+  return session === undefined ? (
+    <></>
+  ) : session === null ? (
+    <Link href="/api/auth/signin">
+      <Button variant="contained">Sign in</Button>
+    </Link>
+  ) : (
     <div>
       <IconButton onClick={openMenu}>
-        <Avatar
-          alt={props.session.user.name ?? ""}
-          src={props.session.user.image ?? ""}
-        />
+        <Avatar alt={session.user.name ?? ""} src={session.user.image ?? ""} />
       </IconButton>
       <Menu anchorEl={anchorEl} open={open} onClose={handleClose}>
         <MenuItem>Profile</MenuItem>
@@ -43,9 +43,5 @@ export default function Account(props: AccountProps) {
         <MenuItem onClick={logOut}>Sign out</MenuItem>
       </Menu>
     </div>
-  ) : (
-    <Link href="/api/auth/signin">
-      <Button variant="contained">Sign in</Button>
-    </Link>
   );
 }

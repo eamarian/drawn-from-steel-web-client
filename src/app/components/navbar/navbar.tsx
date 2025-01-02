@@ -1,50 +1,66 @@
 "use client";
 
 import Link from "next/link";
-import { Session } from "next-auth";
-import { Box, AppBar, IconButton, Toolbar, Typography } from "@mui/material";
+import {
+  Box,
+  AppBar,
+  Button,
+  IconButton,
+  Link as MUILink,
+  Toolbar,
+  Typography,
+  Breadcrumbs,
+} from "@mui/material";
 import HomeIcon from "@mui/icons-material/Home";
 import Account from "./account";
 import "./navbar.scss";
+import { SessionProvider } from "next-auth/react";
+import { usePathname } from "next/navigation";
 
-interface NavbarProps {
-  session: Session | null;
-}
+const breadcrumbMap: Map<string, string> = new Map([
+  ["/rules", "Rules"],
+  ["/heroes", "Heroes"],
+  ["/homebrew", "Homewbrew"],
+]);
 
-export default function Navbar(props: NavbarProps) {
+export default function Navbar() {
+  const pathName: string = usePathname();
+  const pathNames: string[] = pathName.split("/").filter((x) => x);
+  console.log(pathName);
+
   return (
     <AppBar color="transparent" position="static">
       <Box paddingX={2}>
         <Toolbar>
-          <Link href="/">
-            <IconButton size="large">
-              <HomeIcon />
-            </IconButton>
-          </Link>
-          <Typography marginLeft={4} flexGrow={1} variant="h1">
-            Drawn From Steel
-          </Typography>
-          <Account session={props.session} />
+          <Breadcrumbs separator=">">
+            <MUILink
+              underline="hover"
+              sx={{ display: "flex", alignItems: "center" }}
+              color="inherit"
+              href="/"
+            >
+              <HomeIcon sx={{ mr: 0.5 }} fontSize="inherit" />
+              <Typography variant="h2">Drawn From Steel</Typography>
+            </MUILink>
+            {pathNames.map((value, index) => {
+              const last = index === pathNames.length - 1;
+              const to = `/${pathNames.slice(0, index + 1).join("/")}`;
+              return last ? (
+                <Typography color="inherit" key={to}>
+                  {breadcrumbMap.get(to) || "?"}
+                </Typography>
+              ) : (
+                <MUILink underline="hover" color="inherit" href={to} key={to}>
+                  {breadcrumbMap.get(to) || "?"}
+                </MUILink>
+              );
+            })}
+          </Breadcrumbs>
+          <SessionProvider>
+            <Account />
+          </SessionProvider>
         </Toolbar>
       </Box>
     </AppBar>
-
-    // <nav className="main-nav">
-    //   <span className="title">
-    //     <Link href="/">
-    //       <Image
-    //         className="logo"
-    //         src="/logo.svg"
-    //         alt="Drawn From Steel Logo"
-    //         height={800}
-    //         width={800}
-    //       ></Image>
-    //     </Link>
-    //     <Typography variant="h1">Drawn From Steel</Typography>
-    //   </span>
-    //   <span className="main-nav-section">
-    //     <Avatar className="avatar"></Avatar>
-    //   </span>
-    // </nav>
   );
 }
