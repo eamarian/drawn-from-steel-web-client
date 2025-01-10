@@ -9,7 +9,6 @@ import {
   CardActionArea,
   CardActions,
   Typography,
-  Box,
   IconButton,
   Tooltip,
   Dialog,
@@ -22,7 +21,7 @@ import {
   CircularProgress,
 } from "@mui/material";
 
-import { MouseEventHandler, MouseEvent, useState } from "react";
+import { MouseEventHandler, useEffect, useState } from "react";
 
 import EditIcon from "@mui/icons-material/Edit";
 import CopyIcon from "@mui/icons-material/ContentCopy";
@@ -37,36 +36,17 @@ import { usePathname } from "next/navigation";
 import createNewHero from "./create-new-hero";
 import deleteHero from "./delete-hero";
 
+import getAncestries from "@/app/actions/getAncestries";
+import getCareers from "@/app/actions/getCareers";
+import getHeroClasses from "@/app/actions/getHeroClasses";
+
+import Field from "@/app/components/field";
+import Ancestry from "@/app/models/ancestry";
+import Career from "@/app/models/career";
+import HeroClass from "@/app/models/hero-class";
+
 interface HeroCardProps {
   hero: Hero;
-}
-
-interface FieldProps {
-  label: string;
-  value: string | undefined;
-  defaultValue?: string;
-}
-
-function Field(props: FieldProps) {
-  return (
-    <Box marginY={1}>
-      <Typography
-        paddingInlineEnd={1}
-        fontWeight="bold"
-        component="span"
-        variant="body1"
-      >
-        {props.label}
-      </Typography>
-      <Typography component="span" variant="body1">
-        {props.value
-          ? props.value
-          : props.defaultValue
-          ? props.defaultValue
-          : "None"}
-      </Typography>
-    </Box>
-  );
 }
 
 async function deleteHeroAction(
@@ -90,28 +70,45 @@ async function createNewHeroAction(
 }
 
 export default function HeroCard(props: HeroCardProps) {
+  const [ancestries, setAncestries] = useState<Map<number, Ancestry> | null>(
+    null
+  );
+  const [careers, setCareers] = useState<Map<number, Career> | null>(null);
+  const [heroClasses, setHeroClasses] = useState<Map<number, HeroClass> | null>(
+    null
+  );
+
+  useEffect(() => {
+    const fetchAncestries = async () => {
+      setAncestries(await getAncestries());
+    };
+    const fetchCareers = async () => {
+      setCareers(await getCareers());
+    };
+    const fetchHeroClasses = async () => {
+      setHeroClasses(await getHeroClasses());
+    };
+    fetchAncestries();
+    fetchCareers();
+    fetchHeroClasses();
+  }, []);
+
   const pathName: string = usePathname();
 
   const [deleteDialogOpen, setDeleteDialogOpen] = useState<boolean>(false);
   const [deleteDialogInput, setDeleteDialogInput] = useState<string>("");
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
 
-  const handleInitiateDelete: MouseEventHandler<HTMLButtonElement> = (
-    event: MouseEvent<HTMLButtonElement>
-  ) => {
+  const handleInitiateDelete: MouseEventHandler<HTMLButtonElement> = () => {
     setDeleteDialogOpen(true);
     setDeleteDialogInput("");
   };
 
-  const handleCancelDelete: MouseEventHandler<HTMLButtonElement> = (
-    event: MouseEvent<HTMLButtonElement>
-  ) => {
+  const handleCancelDelete: MouseEventHandler<HTMLButtonElement> = () => {
     setDeleteDialogOpen(false);
   };
 
-  const handleConfirmDelete: MouseEventHandler<HTMLButtonElement> = (
-    event: MouseEvent<HTMLButtonElement>
-  ) => {
+  const handleConfirmDelete: MouseEventHandler<HTMLButtonElement> = () => {
     setIsDeleting(true);
     deleteHeroAction(props.hero.userId, props.hero.id, pathName, () => {
       setIsDeleting(false);
@@ -123,28 +120,28 @@ export default function HeroCard(props: HeroCardProps) {
   const [copyHeroName, setCopyHeroName] = useState<string>("");
   const [isCopying, setIsCopying] = useState<boolean>(false);
 
-  const handleInitiateCopy: MouseEventHandler<HTMLButtonElement> = (
-    event: MouseEvent<HTMLButtonElement>
-  ) => {
+  const handleInitiateCopy: MouseEventHandler<HTMLButtonElement> = () => {
     setCopyDialogOpen(true);
     setCopyHeroName(name + " - Copy");
   };
 
-  const handleCancelCopy: MouseEventHandler<HTMLButtonElement> = (
-    event: MouseEvent<HTMLButtonElement>
-  ) => {
+  const handleCancelCopy: MouseEventHandler<HTMLButtonElement> = () => {
     setCopyDialogOpen(false);
   };
 
-  const handleConfirmCopy: MouseEventHandler<HTMLButtonElement> = (
-    event: MouseEvent<HTMLButtonElement>
-  ) => {
+  const handleConfirmCopy: MouseEventHandler<HTMLButtonElement> = () => {
     setIsCopying(true);
     createNewHeroAction(
       {
         id: 0,
         userId: props.hero.userId,
         name: copyHeroName,
+        ancestryId: props.hero.ancestryId,
+        organizationId: props.hero.organizationId,
+        environmentId: props.hero.environmentId,
+        upbringingId: props.hero.upbringingId,
+        careerId: props.hero.careerId,
+        heroClassId: props.hero.heroClassId,
         image: props.hero.image,
         level: props.hero.level,
       },
@@ -168,7 +165,12 @@ export default function HeroCard(props: HeroCardProps) {
           component="div"
           style={{ position: "relative", height: 140, width: "100%" }}
         >
-          <Image src={image} alt={"Test"} fill objectFit="contain" />
+          <Image
+            src={image}
+            alt={"Test"}
+            fill
+            style={{ objectFit: "contain" }}
+          />
         </CardMedia>
         <CardHeader
           titleTypographyProps={{ textTransform: "uppercase" }}
@@ -176,24 +178,41 @@ export default function HeroCard(props: HeroCardProps) {
         ></CardHeader>
         <Divider variant="middle" />
         <CardContent>
-          {/* <Field label="Ancestry" value={props.hero.ancestry} />
-          <Field label="Career" value={props.hero.career} />
-          <Field label="Class" value={props.hero.heroClass} />
-          {props.hero.subclass && <Field {...props.hero.subclass} />} */}
+          <Field
+            label="Ancestry"
+            value={
+              props.hero.ancestryId && ancestries
+                ? ancestries.get(props.hero.ancestryId)?.type
+                : undefined
+            }
+          />
+          <Field
+            label="Career"
+            value={
+              props.hero.careerId && careers
+                ? careers.get(props.hero.careerId)?.name
+                : undefined
+            }
+          />
+          <Field
+            label="Class"
+            value={
+              props.hero.heroClassId && heroClasses
+                ? heroClasses.get(props.hero.heroClassId)?.name
+                : undefined
+            }
+          />
+          {/* {props.hero.subclass && <Field {...props.hero.subclass} />} */}
           <Field
             label="Level"
             value={props.hero.level.toString()}
             defaultValue="-"
           />
-          {/* <Field label="Kit" value={props.hero.kit.join(", ")} /> */}
         </CardContent>
       </CardActionArea>
       <CardActions>
         <Tooltip title="Edit">
-          <IconButton
-            component={Link}
-            href={`/heroes/${props.hero.id}/edit/think`}
-          >
+          <IconButton component={Link} href={`/heroes/${props.hero.id}/edit/`}>
             <EditIcon />
           </IconButton>
         </Tooltip>

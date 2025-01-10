@@ -1,1 +1,4 @@
-export default class HeroClass {}
+export default interface HeroClass {
+  id: number;
+  name: string;
+}

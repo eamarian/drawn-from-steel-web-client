@@ -1,11 +1,9 @@
 "use client";
 
-import Link from "next/link";
+import NextLink from "next/link";
 import {
   Box,
   AppBar,
-  Button,
-  IconButton,
   Link as MUILink,
   Toolbar,
   Typography,
@@ -25,16 +23,24 @@ const breadcrumbMap: Map<string, string> = new Map([
 
 export default function Navbar() {
   const pathName: string = usePathname();
-  const pathNames: string[] = pathName.split("/").filter((x) => x);
-  console.log(pathName);
+  console.log(`Path Name: ${pathName}`);
+
+  let pathNameMatch: [string, string] | null = null;
+  for (const [key, value] of breadcrumbMap.entries()) {
+    if (pathName.startsWith(key)) {
+      pathNameMatch = [key, value];
+      break;
+    }
+  }
 
   return (
     <AppBar color="transparent" position="static">
       <Box paddingX={2}>
-        <Toolbar>
-          <Breadcrumbs separator=">">
+        <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
+          <Breadcrumbs separator="">
             <MUILink
-              underline="hover"
+              component={NextLink}
+              underline="none"
               sx={{ display: "flex", alignItems: "center" }}
               color="inherit"
               href="/"
@@ -42,19 +48,16 @@ export default function Navbar() {
               <HomeIcon sx={{ mr: 0.5 }} fontSize="inherit" />
               <Typography variant="h2">Drawn From Steel</Typography>
             </MUILink>
-            {pathNames.map((value, index) => {
-              const last = index === pathNames.length - 1;
-              const to = `/${pathNames.slice(0, index + 1).join("/")}`;
-              return last ? (
-                <Typography color="inherit" key={to}>
-                  {breadcrumbMap.get(to) || "?"}
-                </Typography>
-              ) : (
-                <MUILink underline="hover" color="inherit" href={to} key={to}>
-                  {breadcrumbMap.get(to) || "?"}
-                </MUILink>
-              );
-            })}
+            {pathNameMatch && (
+              <MUILink
+                component={NextLink}
+                underline="none"
+                color="inherit"
+                href={pathNameMatch[0]}
+              >
+                <Typography variant="h4">{pathNameMatch[1]}</Typography>
+              </MUILink>
+            )}
           </Breadcrumbs>
           <SessionProvider>
             <Account />

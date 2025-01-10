@@ -30,7 +30,7 @@ export default async function createNewHero(
     const data = await response.json();
     const heroResponse: Hero = data;
     const heroId = heroResponse.id;
-    redirectPath = redirectToNewHero ? `/heroes/${heroId}/edit/think` : null;
+    redirectPath = redirectToNewHero ? `/heroes/${heroId}/edit` : null;
   } catch (error) {
     console.error(error);
     redirectPath = null;
