@@ -19,7 +19,7 @@ export default async function saveHero(hero: Hero): Promise<boolean> {
       return true;
     }
   } catch (error) {
-    console.log(error);
+    console.error(error);
     return false;
   }
 }

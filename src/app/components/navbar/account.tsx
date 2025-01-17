@@ -25,7 +25,6 @@ export default function Account() {
   const handleClose = () => {
     setAnchorEl(null);
   };
-  console.log(session);
   return session === undefined ? (
     <></>
   ) : session === null ? (

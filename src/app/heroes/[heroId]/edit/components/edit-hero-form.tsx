@@ -132,7 +132,6 @@ export default function EditHeroForm({ initialHero }: EditHeroFormProps) {
     } else {
       setOpenFailure(true);
     }
-    console.log("Hero:", hero);
   };
   const [openSuccess, setOpenSuccess] = useState(false);
   const [openFailure, setOpenFailure] = useState(false);

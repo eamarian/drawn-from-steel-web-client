@@ -107,26 +107,28 @@ export default function CustomerAdapter(): Adapter {
     async getSessionAndUser(
       sessionToken: string
     ): Promise<{ session: AdapterSession; user: AdapterUser } | null> {
-      const url: URL = new URL(`api/Session/${sessionToken}`, baseUrl);
-      const response: Response = await fetch(url);
-      if (!response.ok) return null;
+      try {
+        const url: URL = new URL(`api/Session/${sessionToken}`, baseUrl);
+        const response: Response = await fetch(url);
+        if (!response.ok) return null;
 
-      const data = await response.json();
-      if (data == null) {
+        const data = await response.json();
+        if (data == null) {
+          return null;
+        } else {
+          const { session: sessionData, user: userData } = format<{
+            session: Record<string, unknown>;
+            user: Record<string, unknown>;
+          }>(data);
+          if (sessionData == null || userData == null) return null;
+          const session: AdapterSession = format<AdapterSession>(sessionData);
+          const user: AdapterUser = format<AdapterUser>(userData);
+          return { session, user };
+        }
+      } catch (e) {
+        console.log(e);
         return null;
-      } else {
-        const { session: sessionData, user: userData } = format<{
-          session: Record<string, unknown>;
-          user: Record<string, unknown>;
-        }>(data);
-        if (sessionData == null || userData == null) return null;
-        const session: AdapterSession = format<AdapterSession>(sessionData);
-        const user: AdapterUser = format<AdapterUser>(userData);
-        return { session, user };
       }
-      // return data
-      //   ? null
-      //   : format<{ session: AdapterSession; user: AdapterUser }>(data);
     },
     async updateSession(
       session: Partial<AdapterSession> & Pick<AdapterSession, "sessionToken">

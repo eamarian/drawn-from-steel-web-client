@@ -13,8 +13,6 @@ export default async function EditHeroPage({
   const heroId: number = (await params).heroId;
   const session: Session | null = await getNextServerSession();
   const userId: number = Number.parseInt(session?.user?.id ?? "");
-  console.log(`Hero ID: ${heroId}`);
-  console.log(`User ID: ${userId}`);
   const hero: Hero | null = await getHero(userId, heroId);
 
   return hero == null ? (

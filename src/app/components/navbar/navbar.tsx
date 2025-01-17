@@ -23,7 +23,6 @@ const breadcrumbMap: Map<string, string> = new Map([
 
 export default function Navbar() {
   const pathName: string = usePathname();
-  console.log(`Path Name: ${pathName}`);
 
   let pathNameMatch: [string, string] | null = null;
   for (const [key, value] of breadcrumbMap.entries()) {
