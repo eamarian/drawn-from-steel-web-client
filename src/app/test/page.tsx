@@ -1,5 +1,5 @@
-import { Typography } from "@mui/material";
+import Loading from "../loading";
 
 export default function TestPage() {
-  return <Typography>Test</Typography>;
+  return <Loading />;
 }

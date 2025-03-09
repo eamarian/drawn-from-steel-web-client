@@ -21,7 +21,7 @@ import {
   CircularProgress,
 } from "@mui/material";
 
-import { MouseEventHandler, useEffect, useState } from "react";
+import { MouseEventHandler, useState } from "react";
 
 import EditIcon from "@mui/icons-material/Edit";
 import CopyIcon from "@mui/icons-material/ContentCopy";
@@ -36,10 +36,6 @@ import { usePathname } from "next/navigation";
 import createNewHero from "./create-new-hero";
 import deleteHero from "./delete-hero";
 
-import getAncestries from "@/app/actions/getAncestries";
-import getCareers from "@/app/actions/getCareers";
-import getHeroClasses from "@/app/actions/getHeroClasses";
-
 import Field from "@/app/components/field";
 import Ancestry from "@/app/models/ancestry";
 import Career from "@/app/models/career";
@@ -47,6 +43,9 @@ import HeroClass from "@/app/models/hero-class";
 
 interface HeroCardProps {
   hero: Hero;
+  ancestries: Map<number, Ancestry>;
+  careers: Map<number, Career>;
+  heroClasses: Map<number, HeroClass>;
 }
 
 async function deleteHeroAction(
@@ -69,30 +68,12 @@ async function createNewHeroAction(
   callback();
 }
 
-export default function HeroCard(props: HeroCardProps) {
-  const [ancestries, setAncestries] = useState<Map<number, Ancestry> | null>(
-    null
-  );
-  const [careers, setCareers] = useState<Map<number, Career> | null>(null);
-  const [heroClasses, setHeroClasses] = useState<Map<number, HeroClass> | null>(
-    null
-  );
-
-  useEffect(() => {
-    const fetchAncestries = async () => {
-      setAncestries(await getAncestries());
-    };
-    const fetchCareers = async () => {
-      setCareers(await getCareers());
-    };
-    const fetchHeroClasses = async () => {
-      setHeroClasses(await getHeroClasses());
-    };
-    fetchAncestries();
-    fetchCareers();
-    fetchHeroClasses();
-  }, []);
-
+export default function HeroCard({
+  hero,
+  ancestries,
+  careers,
+  heroClasses,
+}: HeroCardProps) {
   const pathName: string = usePathname();
 
   const [deleteDialogOpen, setDeleteDialogOpen] = useState<boolean>(false);
@@ -110,7 +91,7 @@ export default function HeroCard(props: HeroCardProps) {
 
   const handleConfirmDelete: MouseEventHandler<HTMLButtonElement> = () => {
     setIsDeleting(true);
-    deleteHeroAction(props.hero.userId, props.hero.id, pathName, () => {
+    deleteHeroAction(hero.userId, hero.id, pathName, () => {
       setIsDeleting(false);
       setDeleteDialogOpen(false);
     });
@@ -134,16 +115,16 @@ export default function HeroCard(props: HeroCardProps) {
     createNewHeroAction(
       {
         id: 0,
-        userId: props.hero.userId,
+        userId: hero.userId,
         name: copyHeroName,
-        ancestryId: props.hero.ancestryId,
-        organizationId: props.hero.organizationId,
-        environmentId: props.hero.environmentId,
-        upbringingId: props.hero.upbringingId,
-        careerId: props.hero.careerId,
-        heroClassId: props.hero.heroClassId,
-        image: props.hero.image,
-        level: props.hero.level,
+        ancestryId: hero.ancestryId,
+        organizationId: hero.organizationId,
+        environmentId: hero.environmentId,
+        upbringingId: hero.upbringingId,
+        careerId: hero.careerId,
+        heroClassId: hero.heroClassId,
+        image: hero.image,
+        level: hero.level,
       },
       pathName,
       () => {
@@ -153,14 +134,12 @@ export default function HeroCard(props: HeroCardProps) {
     );
   };
 
-  const name: string = props.hero.name ? props.hero.name : "Unnamed Hero";
-  const image: string = props.hero.image
-    ? props.hero.image
-    : "/hero-placeholder.svg";
+  const name: string = hero.name ? hero.name : "Unnamed Hero";
+  const image: string = hero.image ? hero.image : "/hero-placeholder.svg";
 
   return (
     <Card>
-      <CardActionArea component={Link} href={`/heroes/${props.hero.id}/view`}>
+      <CardActionArea component={Link} href={`/heroes/${hero.id}/view`}>
         <CardMedia
           component="div"
           style={{ position: "relative", height: 140, width: "100%" }}
@@ -181,38 +160,30 @@ export default function HeroCard(props: HeroCardProps) {
           <Field
             label="Ancestry"
             value={
-              props.hero.ancestryId && ancestries
-                ? ancestries.get(props.hero.ancestryId)?.type
+              hero.ancestryId
+                ? ancestries.get(hero.ancestryId)?.type
                 : undefined
             }
           />
           <Field
             label="Career"
-            value={
-              props.hero.careerId && careers
-                ? careers.get(props.hero.careerId)?.name
-                : undefined
-            }
+            value={hero.careerId ? careers.get(hero.careerId)?.name : undefined}
           />
           <Field
             label="Class"
             value={
-              props.hero.heroClassId && heroClasses
-                ? heroClasses.get(props.hero.heroClassId)?.name
+              hero.heroClassId
+                ? heroClasses.get(hero.heroClassId)?.name
                 : undefined
             }
           />
           {/* {props.hero.subclass && <Field {...props.hero.subclass} />} */}
-          <Field
-            label="Level"
-            value={props.hero.level.toString()}
-            defaultValue="-"
-          />
+          <Field label="Level" value={hero.level.toString()} defaultValue="-" />
         </CardContent>
       </CardActionArea>
       <CardActions>
         <Tooltip title="Edit">
-          <IconButton component={Link} href={`/heroes/${props.hero.id}/edit/`}>
+          <IconButton component={Link} href={`/heroes/${hero.id}/edit/`}>
             <EditIcon />
           </IconButton>
         </Tooltip>
